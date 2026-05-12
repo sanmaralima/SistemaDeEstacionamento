@@ -10,6 +10,7 @@ import com.locuspark.api.exception.UserAlreadyExistsException;
 import com.locuspark.api.repository.UserRepository;
 import com.locuspark.api.security.TokenService;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,7 +30,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder; 
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest data) {
+    public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthRequest data) {
         try {
             var usernamePassword = new UsernamePasswordAuthenticationToken(
                     data.username(),
@@ -49,7 +50,8 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Void> register(@RequestBody RegisterRequest data) {
+    public ResponseEntity<Void> register(@RequestBody @Valid RegisterRequest data) {
+
         if (repository.findByUsername(data.username()) != null) {
             throw new UserAlreadyExistsException("O usuário '" + data.username() + "' já existe.");
         }

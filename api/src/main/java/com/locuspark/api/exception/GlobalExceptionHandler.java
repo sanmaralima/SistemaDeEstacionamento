@@ -2,82 +2,68 @@ package com.locuspark.api.exception;
 
 import com.locuspark.api.dto.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<ErrorResponse> handleBadCredentials(InvalidCredentialsException ex, HttpServletRequest request) {
-        ErrorResponse error = new ErrorResponse(
-                LocalDateTime.now(ZoneOffset.UTC),
-                HttpStatus.UNAUTHORIZED.value(),
-                ex.getMessage(),
-                request.getRequestURI()
-        );
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    @ExceptionHandler({
+            InvalidCredentialsException.class,
+            TokenMissingException.class,
+            TokenInvalidException.class,
+            UsernameNotFoundException.class
+    })
+    public ResponseEntity<ErrorResponse> handleUnauthorized(Exception ex, HttpServletRequest request) {
+        return buildResponseEntity(HttpStatus.UNAUTHORIZED, ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleUserExists(
-            UserAlreadyExistsException ex, HttpServletRequest request) {
-        ErrorResponse error = new ErrorResponse(
-                LocalDateTime.now(ZoneOffset.UTC),
-                HttpStatus.CONFLICT.value(),
-                ex.getMessage(),
-                request.getRequestURI()
-        );
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
-    }
-
-    @ExceptionHandler(TokenMissingException.class)
-    public ResponseEntity<ErrorResponse> handleTokenMissing(TokenMissingException ex, HttpServletRequest request) {
-        ErrorResponse error = new ErrorResponse(
-                LocalDateTime.now(ZoneOffset.UTC),
-                HttpStatus.UNAUTHORIZED.value(),
-                ex.getMessage(),
-                request.getRequestURI()
-        );
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    public ResponseEntity<ErrorResponse> handleConflict(UserAlreadyExistsException ex, HttpServletRequest request) {
+        return buildResponseEntity(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI());
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex, HttpServletRequest request) {
-        ErrorResponse error = new ErrorResponse(
-                LocalDateTime.now(ZoneOffset.UTC),
-                HttpStatus.NOT_FOUND.value(),
-                ex.getMessage(),
-                request.getRequestURI()
-        );
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    public ResponseEntity<ErrorResponse> handleNotFound(UserNotFoundException ex, HttpServletRequest request) {
+        return buildResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
     }
 
-    @ExceptionHandler(TokenInvalidException.class)
-    public ResponseEntity<ErrorResponse> handleTokenInvalid(TokenInvalidException ex, HttpServletRequest request) {
-        ErrorResponse error = new ErrorResponse(
-                LocalDateTime.now(ZoneOffset.UTC),
-                HttpStatus.UNAUTHORIZED.value(),
-                ex.getMessage(),
-                request.getRequestURI()
-        );
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, "Erro de validação: " + message, request.getRequestURI());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex, HttpServletRequest request) {
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, "Erro de integridade de dados. Verifique se os campos estão corretos.", request.getRequestURI());
     }
 
     @ExceptionHandler(Exception.class)
+
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, HttpServletRequest request) {
+        // Log the exception in a real scenario
+        return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, "Ocorreu um erro inesperado no servidor.", request.getRequestURI());
+    }
+
+    private ResponseEntity<ErrorResponse> buildResponseEntity(HttpStatus status, String message, String path) {
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(ZoneOffset.UTC),
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Ocorreu um erro inesperado no servidor. Tente novamente.",
-                request.getRequestURI()
+                status.value(),
+                message,
+                path
         );
-        // Em produção, você logaria o erro completo aqui (ex.printStackTrace()) para não expor dados sensíveis na API
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        return ResponseEntity.status(status).body(error);
     }
 }
