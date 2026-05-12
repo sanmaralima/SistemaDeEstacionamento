@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -30,7 +30,7 @@ class UserControllerTest {
     @Autowired
     private TokenService tokenService;
 
-    @MockBean
+    @MockitoBean
     private UserRepository userRepository;
 
     private String validToken;
@@ -61,7 +61,7 @@ class UserControllerTest {
     void shouldReturn401WithoutToken() throws Exception {
         mockMvc.perform(get("/user/profile"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message").value("Token não fornecido ou cabeçalho Authorization ausente."));
+                .andExpect(jsonPath("$.error").value("Token não fornecido ou cabeçalho Authorization ausente."));
     }
 
     @Test
@@ -70,6 +70,6 @@ class UserControllerTest {
         mockMvc.perform(get("/user/profile")
                         .header("Authorization", "Bearer token-invalido-forjado"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message").value("Token mal formatado, inválido ou expirado."));
+                .andExpect(jsonPath("$.error").value("Token mal formatado, inválido ou expirado."));
     }
 }
