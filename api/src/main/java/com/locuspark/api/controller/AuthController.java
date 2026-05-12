@@ -5,12 +5,15 @@ import com.locuspark.api.dto.request.RegisterRequest;
 import com.locuspark.api.dto.response.AuthResponse;
 import com.locuspark.api.entity.User;
 import com.locuspark.api.enums.UserRole;
+import com.locuspark.api.exception.InvalidCredentialsException;
+import com.locuspark.api.exception.UserAlreadyExistsException;
 import com.locuspark.api.repository.UserRepository;
 import com.locuspark.api.security.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -27,18 +30,26 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest data) {
-        var usernamePassword = new UsernamePasswordAuthenticationToken(data.username(), data.password());
-        var auth = this.authenticationManager.authenticate(usernamePassword);
+        try {
+            var usernamePassword = new UsernamePasswordAuthenticationToken(
+                    data.username(),
+                    data.password()
+            );
+            var auth = authenticationManager.authenticate(usernamePassword);
 
-        var token = tokenService.generateToken((User) auth.getPrincipal());
+            var token = tokenService.generateToken((User) auth.getPrincipal());
 
-        return ResponseEntity.ok(new AuthResponse(token));
+            return ResponseEntity.ok(new AuthResponse(token));
+
+        } catch (BadCredentialsException e) {
+            throw new InvalidCredentialsException("Usuário ou senha incorretos");
+        }
     }
 
     @PostMapping("/register")
     public ResponseEntity<Void> register(@RequestBody RegisterRequest data) {
         if (repository.findByUsername(data.username()) != null) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            throw new UserAlreadyExistsException("O usuário '" + data.username() + "' já existe.");
         }
 
         String encryptedPassword = passwordEncoder.encode(data.password());
