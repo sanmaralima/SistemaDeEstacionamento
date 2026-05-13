@@ -10,6 +10,7 @@ Backend do sistema **LocusPark**, uma API REST desenvolvida com **Java + Spring 
 - [Arquitetura](#-arquitetura)
 - [Autenticação JWT](#-autenticação-jwt)
 - [Executando o Projeto](#-executando-o-projeto)
+- [Testes Unitários](#-testes-unitários)
 - [Variáveis de Ambiente](#-variáveis-de-ambiente)
 - [Endpoints](#-endpoints)
     - [Autenticação](#1-autenticação)
@@ -106,6 +107,26 @@ Ou no Windows:
 
 ```bash
 mvnw spring-boot:run
+```
+
+---
+
+# 🧪 Testes Unitários
+
+O projeto conta com uma suíte de testes unitários para garantir o correto funcionamento das regras de negócio, dos controllers e da camada de segurança (JWT).
+
+## Executando os testes
+
+Para executar os testes unitários, utilize o comando:
+
+```bash
+./mvnw test
+```
+
+Ou no Windows:
+
+```bash
+mvnw test
 ```
 
 ---
