@@ -115,6 +115,17 @@ mvnw spring-boot:run
 
 O projeto conta com uma suíte de testes unitários para garantir o correto funcionamento das regras de negócio, dos controllers e da camada de segurança (JWT).
 
+A implementação dos testes foi feita utilizando as seguintes tecnologias e práticas:
+
+- **JUnit 5**: Framework principal para estruturação e execução dos testes, utilizando anotações como `@Test`, `@Nested` e `@DisplayName` para organizar e descrever os cenários de teste.
+- **Mockito**: Utilizado para criação de mocks de dependências (`@MockitoBean`, `@InjectMocks`), garantindo o isolamento da unidade que está a ser testada (ex: mock de repositórios e serviços).
+- **Spring Boot Test & MockMvc**: Essenciais para testar a camada web (`@WebMvcTest`). Permitem simular requisições HTTP (como `GET` e `POST`) e validar respostas (status code e payload JSON) sem a necessidade de iniciar o servidor e o contexto completo da aplicação.
+- **ReflectionTestUtils**: Utilizado para injetar valores em campos privados (como a chave secreta do JWT) diretamente nas instâncias de serviço durante os testes.
+
+**Cobertura de Testes:**
+- **Controllers (`AuthControllerTest`, `UserControllerTest`)**: Validação dos fluxos de registro e login, respostas a cenários de sucesso (HTTP 200, 201) e falhas, como credenciais inválidas (HTTP 401) e conflitos (HTTP 409).
+- **Segurança (`TokenServiceTest`)**: Validação das regras de negócio para geração de tokens válidos e lançamento de exceções (`TokenInvalidException`) ao validar tokens incorretos ou forjados.
+
 ## Executando os testes
 
 Para executar os testes unitários, utilize o comando:
