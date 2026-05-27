@@ -1,48 +1,45 @@
 package com.locuspark.api.controller;
 
 import com.locuspark.api.dto.request.UserUpdateRequest;
-import com.locuspark.api.dto.response.UserProfileResponse;
+import com.locuspark.api.dto.response.UserResponse;
 import com.locuspark.api.entity.User;
-import com.locuspark.api.exception.UserNotFoundException;
+import com.locuspark.api.exception.BusinessException;
+import com.locuspark.api.mapper.UserMapper;
 import com.locuspark.api.service.UserService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
-
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+    private final UserMapper userMapper;
 
     @GetMapping("/profile")
-    public ResponseEntity<UserProfileResponse> getProfile(@AuthenticationPrincipal User user) {
-
+    public ResponseEntity<UserResponse> getProfile(@AuthenticationPrincipal User user) {
         if (user == null) {
-            throw new UserNotFoundException("Usuário não encontrado no sistema.");
+            throw new BusinessException("Usuário não encontrado no sistema.");
         }
-        UserProfileResponse profile = new UserProfileResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getRole()
-        );
+        // Retorna o DTO completo, incluindo o companyId mapeado pelo MapStruct
+        return ResponseEntity.ok(userMapper.toResponse(user));
+    }
 
-        return ResponseEntity.ok(profile);
+    @GetMapping("/company/{companyId}")
+    public ResponseEntity<List<UserResponse>> getByCompany(@PathVariable UUID companyId) {
+        return ResponseEntity.ok(userService.listAllByCompany(companyId));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserProfileResponse> update(
-            @PathVariable UUID id,
-            @RequestBody @Valid UserUpdateRequest request) {
-        UserProfileResponse updatedUser = userService.updateUser(id, request);
-        return ResponseEntity.ok(updatedUser);
+    public ResponseEntity<UserResponse> update(@PathVariable UUID id, @RequestBody @Valid UserUpdateRequest request) {
+        return ResponseEntity.ok(userService.updateUser(id, request));
     }
 
     @DeleteMapping("/{id}")
