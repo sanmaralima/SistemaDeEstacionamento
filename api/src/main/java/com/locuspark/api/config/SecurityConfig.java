@@ -30,7 +30,18 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll() // <-- Adicionado
+                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+
+                        // --- REGRAS PARA COMPANIES ---
+                        // Criar, Deletar e Listar todas as empresas é restrito ao dono do SaaS
+                        .requestMatchers(HttpMethod.POST, "/companies").hasRole("SUPER_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/companies").hasRole("SUPER_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/companies/**").hasRole("SUPER_ADMIN")
+
+                        // Buscar por ID e Atualizar pode ser liberado para ADMIN da própria empresa
+                        .requestMatchers(HttpMethod.GET, "/companies/*").hasAnyRole("SUPER_ADMIN", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/companies/*").hasAnyRole("SUPER_ADMIN", "ADMIN")
+
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
@@ -38,7 +49,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
