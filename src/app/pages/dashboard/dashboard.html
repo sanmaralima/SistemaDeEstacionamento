@@ -1,0 +1,242 @@
+<div class="dashboard-page">
+  <header class="dashboard-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p>{{formatarDataAtual()}}</p>
+    </div>
+
+    <button class="btn-primary" (click)="abrirModalEntrada()">
+      + Registrar Entrada
+    </button>
+  </header>
+
+  <section class="cards">
+    <div class="card">
+      <div>
+        <p>Vagas Livres</p>
+        <h2>{{ vagasLivres }}</h2>
+      </div>
+    </div>
+
+    <div class="card">
+      <div>
+        <p>Vagas Ocupadas</p>
+        <h2>{{ vagasOcupadas }}</h2>
+      </div>
+    </div>
+
+    <div class="card">
+      <div>
+        <p>Veículos no Dia</p>
+        <h2>{{ totalVeiculosDia }}</h2>
+      </div>
+    </div>
+
+    <div class="card">
+      <div>
+        <p>Faturamento Diário</p>
+        <h2>R$ {{ faturamentoDiario | number:'1.2-2' }}</h2>
+      </div>
+    </div>
+  </section>
+
+  <section class="table-card">
+    <div class="table-header">
+      <div>
+        <h2>Veículos Estacionados</h2>
+        @if(veiculos.length === 0){
+          <p>Nenhum veículo no estacionamento </p>
+        }@else if(veiculos.length === 1){
+          <p>{{ veiculos.length }} veículo no estacionamento</p>
+        }@else {
+          <p>{{ veiculos.length }} veículos no estacionamento</p>
+        }
+      </div>
+
+      <div class="search-box">
+        <span class="search-icon"></span>
+        <input
+          type="text"
+          placeholder="Buscar por placa ou modelo..."
+          [(ngModel)]="termoBusca"
+        />
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Placa</th>
+          <th>Modelo</th>
+          <th>Horário de Entrada</th>
+          <th>Tempo</th>
+          <th>Vaga</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for(veiculo of veiculosFiltrados; track $index){
+
+          <tr>
+            <td class="placa">{{ veiculo.placa }}</td>
+  
+            <td>
+              <div class="modelo">
+                <span class="car-icon"></span>
+  
+                <div>
+                  <strong>{{ veiculo.modelo }}</strong>
+                  <small>{{ veiculo.cor }}</small>
+                </div>
+              </div>
+            </td>
+  
+            <td>{{ formatarHorario(veiculo.horarioEntrada) }}</td>
+  
+            <td>{{ calcularTempo(veiculo.horarioEntrada) }}</td>
+  
+            <td>
+              <strong>Vaga {{ veiculo.vaga }}</strong>
+            </td>
+  
+            <td>
+              <span class="status">
+                {{ veiculo.status }}
+              </span>
+            </td>
+  
+            <td>
+              <div class="acoes">
+                <button class="btn-secondary" (click)="abrirModalSaida(veiculo)">
+                  Registrar Saída
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+
+        @if(veiculosFiltrados.length === 0){
+          <tr>
+            <td colspan="7" class="empty">
+              Nenhum veículo encontrado.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+</div>
+
+@if(modalEntradaAberto){
+  <div class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>Registrar Entrada</h2>
+          <p>Preencha os dados do veículo</p>
+        </div>
+  
+        <button class="btn-close" (click)="fecharModalEntrada()">×</button>
+      </div>
+  
+      <div class="modal-body">
+        <label>
+          Placa
+          <input
+            type="text"
+            [(ngModel)]="novaEntrada.placa"
+          />
+        </label>
+  
+        <label>
+          Modelo
+          <input
+            type="text"
+            [(ngModel)]="novaEntrada.modelo"
+          />
+        </label>
+  
+        <label>
+          Cor
+          <input
+            type="text"
+            [(ngModel)]="novaEntrada.cor"
+          />
+        </label>
+  
+        <label>
+          Vaga
+          <select [(ngModel)]="novaEntrada.vaga">
+            <option [ngValue]="0">Selecione uma vaga</option>
+            @for(vaga of vagasDisponiveis; track $index){
+              <option [ngValue]="vaga.numero">
+                Vaga {{ vaga.numero }}
+              </option>
+            }
+          </select>
+        </label>
+      </div>
+  
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="fecharModalEntrada()">Cancelar</button>
+        <button class="btn-confirm" (click)="confirmarEntrada()">Confirmar Entrada</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if(modalSaidaAberto && veiculoSelecionado){
+  <div class="modal-backdrop">
+    <div class="modal modal-saida">
+      <div class="modal-header">
+        <div>
+          <h2>Registrar Saída</h2>
+          <p>Confirme os dados do veículo</p>
+        </div>
+  
+        <button class="btn-close" (click)="fecharModalSaida()">×</button>
+      </div>
+  
+      <div class="saida-box">
+        <div class="saida-row">
+          <span>Placa</span>
+          <strong>{{ veiculoSelecionado.placa }}</strong>
+        </div>
+  
+        <div class="saida-row">
+          <span>Modelo</span>
+          <strong>{{ veiculoSelecionado.modelo }}</strong>
+        </div>
+  
+        <div class="saida-row">
+          <span>Vaga</span>
+          <strong>{{ veiculoSelecionado.vaga }}</strong>
+        </div>
+  
+        <div class="saida-row">
+          <span>Entrada</span>
+          <strong>{{ veiculoSelecionado.horarioEntrada | date:'dd/MM/yyyy, HH:mm' }}</strong>
+        </div>
+  
+        <div class="saida-row">
+          <span>Tempo</span>
+          <strong>{{ calcularTempo(veiculoSelecionado.horarioEntrada) }}</strong>
+        </div>
+  
+        <hr />
+  
+        <div class="saida-row total">
+          <span>Valor a Pagar</span>
+          <strong>R$ {{ calcularValor(veiculoSelecionado.horarioEntrada) | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+  
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="fecharModalSaida()">Cancelar</button>
+        <button class="btn-confirm" (click)="registrarSaida()">Confirmar Saída</button>
+      </div>
+    </div>
+  </div>
+}
