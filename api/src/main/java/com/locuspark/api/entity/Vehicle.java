@@ -22,6 +22,7 @@ public class Vehicle {
     private UUID id;
 
     @Column(nullable = false, length = 7)
+    @Convert(converter = com.locuspark.api.infrastructure.converter.PlateConverter.class)
     private Plate plate;
 
     @Column(nullable = false)
