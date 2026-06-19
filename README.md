@@ -148,4 +148,3 @@ json
   "status": "ACTIVE",
   "companyId": "7359c468-4a16-46ad-b914-2c68d7a120db"
 }
----
