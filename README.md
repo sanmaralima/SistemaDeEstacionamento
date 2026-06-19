@@ -58,6 +58,53 @@ api/src/main/java/com/locuspark/api/
 └── types/                   # Value Objects de domínio (Cpf, Cnpj, Plate)
 ```
 
+### Branch: frontend
+
+```text
+src/app/
+├── core/
+│   ├── models/              # Interfaces TypeScript de domínio (Vaga, Veículo)
+│   └── services/            # Serviços Angular de integração HTTP e reatividade
+├── layout/                  # Componentes estruturais globais (Sidebar, Navbar)
+├── pages/
+│   ├── dashboard/           # Métricas financeiras e de ocupação
+│   ├── controle-vagas/      # Monitoramento em tempo real do pátio
+│   └── historico/           # Registro geral de entradas e saídas
+└── shared/                  # Componentes reutilizáveis (Modais de Entrada e Saída)
+```
+
+## 🚀 Como Instalar e Rodar o Projeto
+
+### Pré-requisitos
+
+* *Java 21* ou superior instalado.
+* *Node.js 20+* e *Angular CLI* instalados globalmente.
+* *Git* configurado.
+
+---
+
+### 🟢 Rodando o Backend (API)
+
+1. *Abra o terminal e mude para a branch backend:*
+    bash
+    git checkout backend
+    
+2. *Navegue até a pasta da API:*
+    bash
+    cd api
+    
+3. *Configure as credenciais locais:*
+    * Renomeie ou configure o arquivo src/main/resources/application-local.properties com as credenciais do seu banco MySQL/PostgreSQL local.
+4. *Execute a suíte de testes automatizados (Garante a integridade do código):*
+    bash
+    ./mvnw clean test
+    
+5. *Suba a aplicação localmente:*
+    bash
+    ./mvnw spring-boot:run
+    
+    * A API estará respondendo em: http://localhost:8080
+
 ---
 
 ### 🔵 Rodando o Frontend (Painel Angular)
