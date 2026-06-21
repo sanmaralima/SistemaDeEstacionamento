@@ -37,22 +37,24 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-            if (request.getRequestURI().startsWith("/auth/")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
+            var token = this.recoverToken(request);
+            String path = request.getRequestURI();
 
-            var token = recoverToken(request);
-            if (token == null) {
+            boolean isPublic = path.equals("/auth/login") || path.equals("/auth/register") ||
+                    path.startsWith("/v3/api-docs") || path.startsWith("/swagger-ui");
+
+            if (token == null && !isPublic) {
                 throw new TokenMissingException("Token não fornecido ou cabeçalho Authorization ausente.");
             }
 
-            var username = tokenService.validateToken(token);
-            UserDetails user = repository.findByUsername(username);
+            if (token != null) {
+                var username = tokenService.validateToken(token); // O username é pego aqui
+                UserDetails user = repository.findByUsername(username); // O findByUsername roda aqui
 
-            if (user != null) {
-                var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (user != null) {
+                    var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
 
             filterChain.doFilter(request, response);

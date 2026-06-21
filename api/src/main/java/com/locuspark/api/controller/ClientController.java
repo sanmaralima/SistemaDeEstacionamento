@@ -74,7 +74,7 @@ public class ClientController {
     }
 
     private void validateUserAndCompany(User user) {
-        if (user == null || user.getCompany() == null) {
+        if (user == null || (user.getRole() != UserRole.SUPER_ADMIN && user.getCompany() == null)) {
             throw new BusinessException("Acesso negado: Usuário não vinculado a uma empresa.");
         }
     }

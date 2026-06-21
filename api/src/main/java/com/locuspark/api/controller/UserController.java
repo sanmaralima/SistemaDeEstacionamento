@@ -1,5 +1,6 @@
 package com.locuspark.api.controller;
 
+import com.locuspark.api.dto.request.RoleUpdateRequest;
 import com.locuspark.api.dto.request.UserUpdateRequest;
 import com.locuspark.api.dto.response.UserResponse;
 import com.locuspark.api.entity.User;
@@ -46,5 +47,13 @@ public class UserController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/role")
+    public ResponseEntity<UserResponse> updateRole(
+            @PathVariable UUID id,
+            @RequestBody @Valid RoleUpdateRequest request,
+            @AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok(userService.updateUserRole(id, request, currentUser));
     }
 }
