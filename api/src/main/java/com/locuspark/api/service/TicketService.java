@@ -59,7 +59,7 @@ public class TicketService {
     }
 
     @Transactional
-    public TicketResponse checkout(UUID companyId, UUID ticketId) {
+    public TicketResponse checkOut(UUID companyId, UUID ticketId) {
         Ticket ticket = ticketRepository.findByIdAndCompanyId(ticketId, companyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket não encontrado nesta empresa."));
 
