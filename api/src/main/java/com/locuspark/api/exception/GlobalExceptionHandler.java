@@ -62,6 +62,12 @@ public class GlobalExceptionHandler {
         return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI());
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
+        // Recursos não encontrados mapeiam diretamente para o HTTP 404 (Not Found)
+        return buildResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
+    }
+
     private ResponseEntity<ErrorResponse> buildResponseEntity(HttpStatus status, String message, String path) {
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(ZoneOffset.UTC),
