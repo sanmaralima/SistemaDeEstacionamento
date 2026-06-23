@@ -20,7 +20,9 @@ public class PaymentService {
         Duration duration = Duration.between(ticket.getEnteredAt(), exitTime);
         long totalMinutes = duration.toMinutes();
 
-        if (totalMinutes <= tariff.getToleranceMinutes()) {
+        // Leitura segura do valor de tolerância opcional
+        int tolerance = tariff.getToleranceMinutes() != null ? tariff.getToleranceMinutes() : 0;
+        if (totalMinutes <= tolerance) {
             return BigDecimal.ZERO;
         }
 
@@ -31,13 +33,18 @@ public class PaymentService {
 
         BigDecimal finalAmount = BigDecimal.ZERO;
 
-        finalAmount = finalAmount.add(tariff.getFirstHourValue());
+        // Leitura segura do valor da primeira hora
+        BigDecimal firstHour = tariff.getFirstHourValue() != null ? tariff.getFirstHourValue() : BigDecimal.ZERO;
+        finalAmount = finalAmount.add(firstHour);
         long remainingMinutes = totalMinutes - 60;
 
         if (remainingMinutes > 0) {
             long fractionsOf15 = (long) Math.ceil(remainingMinutes / 15.0);
-            BigDecimal additionalCost = tariff.getAdditionalFractionValue()
-                    .multiply(BigDecimal.valueOf(fractionsOf15));
+
+            // Leitura segura do valor da fração adicional
+            BigDecimal additionalFraction = tariff.getAdditionalFractionValue() != null ? tariff.getAdditionalFractionValue() : BigDecimal.ZERO;
+
+            BigDecimal additionalCost = additionalFraction.multiply(BigDecimal.valueOf(fractionsOf15));
             finalAmount = finalAmount.add(additionalCost);
         }
 
@@ -67,11 +74,12 @@ public class PaymentService {
             long freeMinutes = partnership.getValue().longValue() * 60;
             long continuousMinutes = totalMinutes - freeMinutes;
 
-            if (continuousMinutes <= tariff.getToleranceMinutes()) {
+            int tolerance = tariff.getToleranceMinutes() != null ? tariff.getToleranceMinutes() : 0;
+            if (continuousMinutes <= tolerance) {
                 return BigDecimal.ZERO;
             }
 
-            BigDecimal costPerHour = tariff.getFirstHourValue();
+            BigDecimal costPerHour = tariff.getFirstHourValue() != null ? tariff.getFirstHourValue() : BigDecimal.ZERO;
             BigDecimal discount = costPerHour.multiply(partnership.getValue());
             calculatedAmount = calculatedAmount.subtract(discount);
             return calculatedAmount.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : calculatedAmount;

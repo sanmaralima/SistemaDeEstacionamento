@@ -1,9 +1,7 @@
 package com.locuspark.api.entity;
 
-
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -14,29 +12,28 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class TariffConfiguration {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID) // Ajustado para UUID conforme o padrão do projeto
     private UUID id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name= "company_id", nullable = false)
+    @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
-    @Column(nullable = false)
+    @Column(nullable = true) // Agora opcional
     private Integer toleranceMinutes;
 
-    @Column(name = "first_hour_value", nullable = false, precision = 10, scale = 2)
+    @Column(name = "first_hour_value", nullable = true, precision = 10, scale = 2) // Agora opcional
     private BigDecimal firstHourValue;
 
-    @Column(name = "additional_fraction_value", nullable = false, precision = 10, scale = 2)
+    @Column(name = "additional_fraction_value", nullable = true, precision = 10, scale = 2) // Agora opcional
     private BigDecimal additionalFractionValue;
 
-    @Column(name = "overnight_fee", nullable = false, precision = 10, scale = 2)
+    @Column(name = "overnight_fee", nullable = true, precision = 10, scale = 2) // Agora opcional
     private BigDecimal overnightFee;
 
-    @Column(name = "lost_ticket_fee", nullable = false, precision = 10, scale = 2)
+    @Column(name = "lost_ticket_fee", nullable = true, precision = 10, scale = 2) // Agora opcional
     private BigDecimal lostTicketFee;
 }
-

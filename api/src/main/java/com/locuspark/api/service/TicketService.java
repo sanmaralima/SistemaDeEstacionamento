@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -81,6 +82,41 @@ public class TicketService {
         ticket.setTotalAmount(total);
         ticket.setStatus(TicketStatus.PAID);
 
+        return ticketMapper.toResponse(ticketRepository.save(ticket));
+    }
+
+    // Adicione estes métodos dentro da classe TicketService
+
+    public List<TicketResponse> listAllTicketsByCompany(UUID companyId) {
+        return ticketRepository.findAll().stream()
+                .filter(t -> t.getCompany().getId().equals(companyId))
+                .map(ticketMapper::toResponse)
+                .toList();
+    }
+
+    public TicketResponse getTicketByIdAndCompany(UUID id, UUID companyId) {
+        Ticket ticket = ticketRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket não encontrado ou não pertence a esta empresa."));
+        return ticketMapper.toResponse(ticket);
+    }
+
+    @Transactional
+    public void deleteTicket(UUID id, UUID companyId) {
+        Ticket ticket = ticketRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket não encontrado ou não pertence a esta empresa."));
+        ticketRepository.delete(ticket);
+    }
+
+    @Transactional
+    public TicketResponse applyPartnershipToTicket(UUID ticketId, UUID companyId, UUID partnershipId) {
+        Ticket ticket = ticketRepository.findByIdAndCompanyId(ticketId, companyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket não encontrado nesta empresa."));
+
+        Partnership partnership = partnershipRepository.findById(partnershipId)
+                .filter(p -> p.getCompany().getId().equals(companyId))
+                .orElseThrow(() -> new ResourceNotFoundException("Convênio não encontrado ou pertence a outra empresa."));
+
+        ticket.setPartnership(partnership);
         return ticketMapper.toResponse(ticketRepository.save(ticket));
     }
 }
