@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS SAM template para implantação do backend do LocusPark com SnapStart
+
+Globals:
+  Function:
+    Runtime: java21
+    Architectures: [x86_64]
+    MemorySize: 512
+    Timeout: 30
+    SnapStart:
+      ApplyOn: PublishedVersions
+    Environment:
+      Variables:
+        SPRING_PROFILES_ACTIVE: prod
+        DB_URL: '{{resolve:ssm:/locuspark/prod/DB_URL}}'
+        DB_USER: '{{resolve:ssm:/locuspark/prod/DB_USER}}'
+        DB_PASS: '{{resolve:ssm:/locuspark/prod/DB_PASS}}'
+
+Resources:
+  LocusParkAPI:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: com.locuspark.api.StreamLambdaHandler::handleRequest
+      CodeUri: target/api-aws.jar
+      AutoPublishAlias: production
+      Events:
+        ProxyApiRoot:
+          Type: HttpApi
+          Properties:
+            Path: /
+            Method: ANY
+        ProxyApiGreedy:
+          Type: HttpApi
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+
+Outputs:
+  ApiUrl:
+    Description: "URL base de produção do LocusPark (Utilize no front-end em Angular)"
+    Value: !Sub 'https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com'
