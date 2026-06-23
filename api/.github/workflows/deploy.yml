@@ -2,7 +2,7 @@ name: LocusPark Backend Pipeline (AWS Lambda Deploy)
 
 on:
   push:
-    branches: [ main ]
+    branches: [ backend ]
 
 jobs:
   deploy:
