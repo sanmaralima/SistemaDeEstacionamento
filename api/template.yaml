@@ -13,7 +13,7 @@ Globals:
     Environment:
       Variables:
         SPRING_PROFILES_ACTIVE: prod
-        DB_URL: '{{resolve:ssm:/locuspark/prod/DB_URL}}'
+        DB_URL: '{{resolve:ssm-secure:/locuspark/prod/DB_URL}}'
         DB_USER: '{{resolve:ssm-secure:/locuspark/prod/DB_USER}}'
         DB_PASS: '{{resolve:ssm-secure:/locuspark/prod/DB_PASS}}'
         API_SECURITY_TOKEN_SECRET: '{{resolve:ssm-secure:/locuspark/prod/API_SECURITY_TOKEN_SECRET}}'
