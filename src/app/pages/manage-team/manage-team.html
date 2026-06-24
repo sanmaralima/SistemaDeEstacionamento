@@ -1,0 +1,140 @@
+<div class="team-page">
+  <div class="page-header-row">
+    <div class="page-header-info">
+      <h1>Gerenciar Equipe</h1>
+      <div class="subtitle-group">
+        <svg class="subtitle-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+        </svg>
+        <span>Funcionários Cadastrados</span>
+      </div>
+      <p class="subtitle-detail">Controle as permissões de acesso e operadores da unidade</p>
+    </div>
+    <button class="btn-primary" (click)="openModal()">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="16" height="16">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.647-6.374-1.766Z" />
+      </svg>
+      Novo Colaborador
+    </button>
+  </div>
+
+  <div class="team-card">
+    <!-- Busca -->
+    <div class="search-bar-container">
+      <div class="search-box">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.602 10.602Z" />
+        </svg>
+        <input
+          type="text"
+          [value]="searchTerm()"
+          (input)="searchTerm.set($any($event.target).value)"
+          placeholder="Buscar operador por nome..."
+        />
+      </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="table-wrapper">
+      @if (usersQuery.isLoading()) {
+        <div class="loading-placeholder">Buscando equipe...</div>
+      } @else if (usersQuery.isError()) {
+        <div class="error-placeholder">Erro ao carregar equipe.</div>
+      } @else if (filteredUsers().length === 0) {
+        <div class="empty-placeholder">Nenhum operador encontrado.</div>
+      } @else {
+        <table class="team-table">
+          <thead>
+            <tr>
+              <th>USUÁRIO</th>
+              <th>CARGO</th>
+              <th class="text-right">AÇÕES</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of filteredUsers(); track user.id) {
+              <tr>
+                <td class="username-cell">&#64;{{ user.name }}</td>
+                <td>
+                  <span class="role-badge" [class.admin]="user.role === 'ADMIN'">
+                    {{ formatRole(user.role) }}
+                  </span>
+                </td>
+                <td class="text-right">
+                  <div class="actions-group">
+                    <button class="btn-action-icon" title="Editar Permissões" disabled>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                      </svg>
+                    </button>
+                    <button class="btn-action-icon delete" (click)="deleteCollaborator(user.id, user.name)" title="Excluir Colaborador">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.34 6.6m-3.6 0-.34-6.6M9.25 5.05h4.83m-6.47-.23 10.14-.002M9.25 5.05A1.75 1.75 0 0 0 7.5 6.79v11.851a1.75 1.75 0 0 0 1.75 1.75h6.5a1.75 1.75 0 0 0 1.75-1.75V6.8a1.75 1.75 0 0 0-1.75-1.75M9.25 5.05h4.83" />
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Modal Novo Colaborador -->
+@if (modalOpen()) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Novo Colaborador</h3>
+        <button class="btn-close" (click)="closeModal()">×</button>
+      </div>
+      <div class="card-divider"></div>
+      <form (submit)="$event.preventDefault(); addCollaborator()">
+        <div class="modal-body">
+          <div class="form-field">
+            <label for="username">Nome de Usuário (username)</label>
+            <input
+              id="username"
+              type="text"
+              [value]="usernameInput()"
+              (input)="usernameInput.set($any($event.target).value)"
+              placeholder="ex: marcos.patio"
+              required
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="password">Senha Operacional</label>
+            <input
+              id="password"
+              type="password"
+              [value]="passwordInput()"
+              (input)="passwordInput.set($any($event.target).value)"
+              placeholder="Mínimo 6 caracteres"
+              required
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="role">Cargo / Perfil</label>
+            <select
+              id="role"
+              [value]="roleInput()"
+              (change)="roleInput.set($any($event.target).value)"
+            >
+              <option value="COLLABORATOR">Funcionário</option>
+              <option value="ADMIN">Administrador</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" (click)="closeModal()">Cancelar</button>
+          <button type="submit" class="btn-primary">Criar Colaborador</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

@@ -1,49 +1,96 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { EstacionamentoService } from '../../core/services/estacionamento';
-import { VeiculoEstacionado } from '../../core/models/veiculo-estacionado';
-import { Vaga } from '../../core/models/vaga';
-import { ModalEntrada } from '../../shared/components/modal-entrada/modal-entrada';
-import { ModalSaida } from '../../shared/components/modal-saida/modal-saida';
+import { Router } from '@angular/router';
+import { useTicketsQuery } from '../../core/domains/ticket/ticket.hooks';
+import { useReportQuery } from '../../core/domains/report/report.hooks';
+import { useUserProfileQuery } from '../../core/domains/user/user.hooks';
+import { TicketResponse } from '../../core/domains/ticket/ticket.types';
+import { ModalExit } from '../../shared/components/modal-exit/modal-exit.component';
+import { SpotAssignmentService } from '../../shared/services/spot-assignment.service';
+
+interface GridSpot {
+  number: number;
+  ticket: TicketResponse | null;
+  status: 'Livre' | 'Ocupada';
+}
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ModalEntrada, ModalSaida],
+  imports: [CommonModule, ModalExit],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
 export class Dashboard implements OnInit {
-  veiculos: VeiculoEstacionado[] = [];
-  vagasDisponiveis: Vaga[] = [];
-  todasVagas: Vaga[] = [];
-  vagasEmUso: Vaga[] = [];
+  private readonly router = inject(Router);
+  private readonly spotAssignmentService = inject(SpotAssignmentService);
 
-  vagasLivres = 0;
-  vagasOcupadas = 0;
-  totalVeiculosDia = 0;
-  faturamentoDiario = 0;
+  // Queries
+  protected readonly ticketsQuery = useTicketsQuery();
+  protected readonly profileQuery = useUserProfileQuery();
 
-  modalEntradaAberto = false;
-  modalSaidaAberto = false;
+  // Signals
+  protected readonly companyId = computed(() => this.profileQuery.data()?.companyId || null);
+  protected readonly reportQuery = useReportQuery(this.companyId);
 
-  veiculoSelecionado: VeiculoEstacionado | null = null;
+  // Constantes
+  readonly totalSpots = 120;
 
-  novaEntrada = {
-    placa: '',
-    modelo: '',
-    cor: '',
-    vaga: 0,
-  };
+  // Modal checkout
+  readonly modalSaidaAberto = signal(false);
+  readonly veiculoSelecionado = signal<TicketResponse | null>(null);
 
-  constructor(private estacionamentoService: EstacionamentoService) {}
+  // Vagas ocupadas atualmente
+  protected readonly occupiedSpotsCount = computed(() => {
+    return this.ticketsQuery.data()?.length || 0;
+  });
 
-  ngOnInit(): void {
-    this.carregarDados();
+  // Vagas livres atualmente
+  protected readonly freeSpotsCount = computed(() => {
+    return Math.max(0, this.totalSpots - this.occupiedSpotsCount());
+  });
+
+  // Mapeamento dinâmico das vagas de 1 a 120 para o mapa visual
+  protected readonly gridSpots = computed<GridSpot[]>(() => {
+    const activeTickets = this.ticketsQuery.data() || [];
+    this.spotAssignmentService.cleanInactiveTickets(activeTickets);
+
+    const ticketMap = new Map<number, TicketResponse>();
+    activeTickets.forEach((t) => {
+      const spot = this.spotAssignmentService.getSpot(t);
+      if (spot) {
+        ticketMap.set(spot, t);
+      }
+    });
+
+    const spots: GridSpot[] = [];
+    for (let i = 1; i <= this.totalSpots; i++) {
+      const ticket = ticketMap.get(i) || null;
+      spots.push({
+        number: i,
+        ticket,
+        status: ticket ? 'Ocupada' : 'Livre',
+      });
+    }
+    return spots;
+  });
+
+  // Detalhes das vagas ocupadas (apenas os tickets ativos)
+  protected readonly occupiedTickets = computed(() => {
+    return this.ticketsQuery.data() || [];
+  });
+
+  protected getSpotNumber(ticket: TicketResponse): number {
+    return this.spotAssignmentService.getSpot(ticket);
   }
 
-  formatarDataAtual(): string {
+  ngOnInit(): void {
+    // Forçar recarga das queries ao entrar
+    this.ticketsQuery.refetch();
+    this.reportQuery.refetch();
+  }
+
+  protected formatarDataAtual(): string {
     const data = new Date();
     return data.toLocaleDateString('pt-BR', {
       weekday: 'long',
@@ -53,103 +100,22 @@ export class Dashboard implements OnInit {
     });
   }
 
-  carregarDados(): void {
-    this.veiculos = this.estacionamentoService.listarVeiculos();
-
-    this.vagasLivres = this.estacionamentoService.getVagasLivres();
-    this.vagasOcupadas = this.estacionamentoService.getVagasOcupadas();
-    this.totalVeiculosDia = this.estacionamentoService.getTotalVeiculosHoje();
-    this.faturamentoDiario = this.estacionamentoService.getFaturamentoDiario();
-
-    this.vagasDisponiveis = this.estacionamentoService
-      .listarVagas()
-      .filter((vaga) => vaga.status === 'Livre');
-
-    this.todasVagas = this.estacionamentoService.listarVagas();
-    this.vagasEmUso = this.estacionamentoService.getVagasOcupadasDetalhadas();
+  protected irParaEntrada(): void {
+    this.router.navigate(['/entry']);
   }
 
-  // ----- Modal de Entrada -----
-
-  abrirModalEntrada(): void {
-    this.limparFormularioEntrada();
-    this.modalEntradaAberto = true;
+  protected abrirModalSaida(ticket: TicketResponse): void {
+    this.veiculoSelecionado.set(ticket);
+    this.modalSaidaAberto.set(true);
   }
 
-  fecharModalEntrada(): void {
-    this.modalEntradaAberto = false;
+  protected fecharModalSaida(): void {
+    this.modalSaidaAberto.set(false);
+    this.veiculoSelecionado.set(null);
   }
 
-  confirmarEntrada(): void {
-    if (
-      !this.novaEntrada.placa.trim() ||
-      !this.novaEntrada.modelo.trim() ||
-      !this.novaEntrada.cor.trim() ||
-      !this.novaEntrada.vaga
-    ) {
-      return;
-    }
-
-    this.estacionamentoService.registrarEntrada({
-      placa: this.novaEntrada.placa.toUpperCase(),
-      modelo: this.novaEntrada.modelo,
-      cor: this.novaEntrada.cor,
-      vaga: Number(this.novaEntrada.vaga),
-    });
-
-    this.fecharModalEntrada();
-    this.carregarDados();
-  }
-
-  limparFormularioEntrada(): void {
-    this.novaEntrada = { placa: '', modelo: '', cor: '', vaga: 0 };
-  }
-
-  // ----- Modal de Saída -----
-
-  /** Abre o modal de saída a partir do botão "Liberar" na lista de vagas ocupadas */
-  abrirModalSaidaPorVaga(vaga: Vaga): void {
-    // Busca o VeiculoEstacionado correspondente à vaga
-    const veiculo = this.veiculos.find((v) => v.vaga === vaga.numero);
-    if (veiculo) {
-      this.veiculoSelecionado = veiculo;
-      this.modalSaidaAberto = true;
-    }
-  }
-
-  /** Abre o modal de saída diretamente com um VeiculoEstacionado */
-  abrirModalSaida(veiculo: VeiculoEstacionado): void {
-    this.veiculoSelecionado = veiculo;
-    this.modalSaidaAberto = true;
-  }
-
-  fecharModalSaida(): void {
-    this.veiculoSelecionado = null;
-    this.modalSaidaAberto = false;
-  }
-
-  registrarSaida(): void {
-    if (!this.veiculoSelecionado) return;
-
-    this.estacionamentoService.registrarSaida(this.veiculoSelecionado.id);
-    this.fecharModalSaida();
-    this.carregarDados();
-  }
-
-  // ----- Cálculos -----
-
-  calcularTempo(dataEntrada: Date): string {
-    const entrada = new Date(dataEntrada).getTime();
-    const agora = new Date().getTime();
-    const diferencaMinutos = Math.floor((agora - entrada) / 1000 / 60);
-
-    const horas = Math.floor(diferencaMinutos / 60);
-    const minutos = diferencaMinutos % 60;
-
-    return `${horas}h ${minutos}m`;
-  }
-
-  calcularValor(dataEntrada: Date): number {
-    return this.estacionamentoService.calcularValor(dataEntrada);
+  protected handleCheckoutConfirmed(): void {
+    this.ticketsQuery.refetch();
+    this.reportQuery.refetch();
   }
 }
