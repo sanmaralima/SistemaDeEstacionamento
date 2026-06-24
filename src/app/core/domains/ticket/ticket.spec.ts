@@ -76,7 +76,7 @@ describe('TicketService', () => {
     const req = httpMock.expectOne(`${BASE}/t-1`);
     expect(req.request.method).toBe('DELETE');
     req.flush(null);
-    expect(completed).toBeTrue();
+    expect(completed).toBe(true);
   });
 
   it('deve aplicar parceria via PATCH com partnershipId correto', async () => {

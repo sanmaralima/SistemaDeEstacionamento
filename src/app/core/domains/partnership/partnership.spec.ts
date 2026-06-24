@@ -67,6 +67,6 @@ describe('PartnershipService', () => {
     const req = httpMock.expectOne(`${BASE}/p-1`);
     expect(req.request.method).toBe('DELETE');
     req.flush(null);
-    expect(completed).toBeTrue();
+    expect(completed).toBe(true);
   });
 });

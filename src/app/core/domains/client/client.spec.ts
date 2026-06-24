@@ -88,6 +88,6 @@ describe('ClientService', () => {
     const req = httpMock.expectOne(`${BASE}/cl-1`);
     expect(req.request.method).toBe('DELETE');
     req.flush(null);
-    expect(completed).toBeTrue();
+    expect(completed).toBe(true);
   });
 });

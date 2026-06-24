@@ -60,7 +60,7 @@ describe('UserService', () => {
     const req = httpMock.expectOne(`${BASE}/u-1`);
     expect(req.request.method).toBe('DELETE');
     req.flush(null);
-    expect(completed).toBeTrue();
+    expect(completed).toBe(true);
   });
 
   it('deve alterar papel do usuário via PATCH /users/{id}/role', async () => {

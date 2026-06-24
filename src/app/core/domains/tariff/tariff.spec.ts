@@ -68,7 +68,7 @@ describe('TariffService', () => {
     const req = httpMock.expectOne(TARIFF_URL);
     expect(req.request.method).toBe('DELETE');
     req.flush(null);
-    expect(completed).toBeTrue();
+    expect(completed).toBe(true);
   });
 
   it('deve buscar configuração de pricing via GET', async () => {
@@ -94,6 +94,6 @@ describe('TariffService', () => {
     const req = httpMock.expectOne(PRICING_URL);
     expect(req.request.method).toBe('DELETE');
     req.flush(null);
-    expect(completed).toBeTrue();
+    expect(completed).toBe(true);
   });
 });
