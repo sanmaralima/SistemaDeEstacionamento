@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { EstacionamentoService } from '../../../core/services/estacionamento';
-import { VeiculoEstacionado } from '../../../core/models/veiculo-estacionado';
+import { TicketService } from '../../../core/domains/ticket/ticket.service';
+import { TicketResponse, PaymentMethod } from '../../../core/domains/ticket/ticket.types';
 
 interface ItemCobranca {
   descricao: string;
@@ -22,9 +22,11 @@ interface FormaPagamentoOpcao {
   styleUrl: './modal-saida.css',
 })
 export class ModalSaida implements OnChanges {
-  @Input() veiculo: VeiculoEstacionado | null = null;
+  @Input() veiculo: TicketResponse | null = null;
   @Output() fechar = new EventEmitter<void>();
   @Output() confirmado = new EventEmitter<void>();
+
+  private readonly ticketService = inject(TicketService);
 
   agora = new Date();
   tempoDecorrido = '';
@@ -36,13 +38,11 @@ export class ModalSaida implements OnChanges {
   erro = '';
 
   formasPagamento: FormaPagamentoOpcao[] = [
-    { valor: 'dinheiro', label: 'Dinheiro' },
-    { valor: 'pix', label: 'PIX' },
-    { valor: 'credito', label: 'Cartão de Crédito' },
-    { valor: 'debito', label: 'Cartão de Débito' },
+    { valor: 'DINHEIRO', label: 'Dinheiro' },
+    { valor: 'PIX', label: 'PIX' },
+    { valor: 'CARD_CREDIT', label: 'Cartão de Crédito' },
+    { valor: 'CARD_DEBIT', label: 'Cartão de Débito' },
   ];
-
-  constructor(private estacionamentoService: EstacionamentoService) {}
 
   ngOnChanges(): void {
     if (this.veiculo) {
@@ -54,10 +54,19 @@ export class ModalSaida implements OnChanges {
     }
   }
 
+  calcularValorLocal(entradaStr: string): number {
+    const entrada = new Date(entradaStr).getTime();
+    const agora = new Date().getTime();
+    const diffMs = agora - entrada;
+    const diffMin = Math.max(1, Math.floor(diffMs / 60000));
+    const horasCobradas = Math.ceil(diffMin / 60);
+    return horasCobradas * 8; // R$ 8 por hora
+  }
+
   calcularTudo(): void {
     if (!this.veiculo) return;
 
-    const entrada = new Date(this.veiculo.horarioEntrada);
+    const entrada = new Date(this.veiculo.enteredAt);
     const diffMs = this.agora.getTime() - entrada.getTime();
     const diffMin = Math.floor(diffMs / 60000);
     const h = Math.floor(diffMin / 60);
@@ -73,7 +82,7 @@ export class ModalSaida implements OnChanges {
       this.valorBase = dias * 60;
       this.itensCobranca.push({ descricao: `Diária (8h ou mais)`, valor: this.valorBase });
     } else {
-      this.valorBase = this.estacionamentoService.calcularValor(this.veiculo.horarioEntrada);
+      this.valorBase = this.calcularValorLocal(this.veiculo.enteredAt);
       this.itensCobranca.push({ descricao: `${horas}h de permanência`, valor: this.valorBase });
     }
 
@@ -95,8 +104,14 @@ export class ModalSaida implements OnChanges {
 
     if (!this.veiculo) return;
 
-    this.estacionamentoService.registrarSaida(this.veiculo.id);
-    this.confirmado.emit();
-    this.fechar.emit();
+    this.ticketService.checkOut(this.veiculo.id, this.formaPagamento as PaymentMethod).subscribe({
+      next: () => {
+        this.confirmado.emit();
+        this.fechar.emit();
+      },
+      error: (err) => {
+        this.erro = err?.error?.message || 'Erro ao registrar saída.';
+      }
+    });
   }
 }

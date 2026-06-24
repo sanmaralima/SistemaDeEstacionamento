@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { EstacionamentoService } from '../../core/services/estacionamento';
-import { VeiculoEstacionado } from '../../core/models/veiculo-estacionado';
+import { TicketService } from '../../core/domains/ticket/ticket.service';
+import { TicketResponse } from '../../core/domains/ticket/ticket.types';
 import { ModalSaida } from '../../shared/components/modal-saida/modal-saida';
 
 @Component({
@@ -13,22 +13,29 @@ import { ModalSaida } from '../../shared/components/modal-saida/modal-saida';
   styleUrl: './saida.css',
 })
 export class Saida implements OnInit {
-  veiculos: VeiculoEstacionado[] = [];
-  resultados: VeiculoEstacionado[] = [];
+  veiculos: TicketResponse[] = [];
+  resultados: TicketResponse[] = [];
   termoBusca = '';
   buscaFocada = false;
 
   modalAberto = false;
-  veiculoSelecionado: VeiculoEstacionado | null = null;
+  veiculoSelecionado: TicketResponse | null = null;
 
-  constructor(private estacionamentoService: EstacionamentoService) {}
+  private readonly ticketService = inject(TicketService);
 
   ngOnInit(): void {
     this.carregarVeiculos();
   }
 
   carregarVeiculos(): void {
-    this.veiculos = this.estacionamentoService.listarVeiculos();
+    this.ticketService.getAll().subscribe({
+      next: (data) => {
+        this.veiculos = data;
+      },
+      error: () => {
+        this.veiculos = [];
+      }
+    });
   }
 
   onBusca(): void {
@@ -40,12 +47,12 @@ export class Saida implements OnInit {
 
     this.resultados = this.veiculos.filter(
       (v) =>
-        v.placa.toLowerCase().includes(busca) ||
-        v.modelo.toLowerCase().includes(busca)
+        v.vehicle.plate.toLowerCase().includes(busca) ||
+        v.vehicle.model.toLowerCase().includes(busca)
     );
   }
 
-  selecionarVeiculo(veiculo: VeiculoEstacionado): void {
+  selecionarVeiculo(veiculo: TicketResponse): void {
     this.veiculoSelecionado = veiculo;
     this.modalAberto = true;
   }

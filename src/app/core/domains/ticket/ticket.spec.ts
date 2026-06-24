@@ -45,11 +45,12 @@ describe('TicketService', () => {
     expect(thrownError).toBeDefined();
   });
 
-  it('deve disparar POST para check-out', async () => {
-    const exited = { ...mockTicket, exitedAt: '2024-01-01T12:00:00Z', status: 'CLOSED' };
-    const promise = firstValueFrom(service.checkOut('t-1'));
-    const req = httpMock.expectOne(`${BASE}/t-1/check-out`);
+  it('deve disparar POST para check-out com paymentMethod', async () => {
+    const exited = { ...mockTicket, exitedAt: '2024-01-01T12:00:00Z', status: 'CLOSED', paymentMethod: 'DINHEIRO' as const };
+    const promise = firstValueFrom(service.checkOut('t-1', 'DINHEIRO'));
+    const req = httpMock.expectOne(`${BASE}/t-1/check-out?paymentMethod=DINHEIRO`);
     expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ paymentMethod: 'DINHEIRO' });
     req.flush(exited);
     expect(await promise).toEqual(exited);
   });

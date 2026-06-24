@@ -2,7 +2,7 @@ import { inject, Signal } from '@angular/core';
 import { injectQuery, injectMutation, QueryClient } from '@tanstack/angular-query-experimental';
 import { lastValueFrom } from 'rxjs';
 import { TicketService } from './ticket.service';
-import { ApplyPartnershipParams } from './ticket.types';
+import { ApplyPartnershipParams, CheckOutParams } from './ticket.types';
 
 export function useTicketsQuery() {
   const service = inject(TicketService);
@@ -34,7 +34,7 @@ export function useCheckOutMutation() {
   const service = inject(TicketService);
   const queryClient = inject(QueryClient);
   return injectMutation(() => ({
-    mutationFn: (id: string) => lastValueFrom(service.checkOut(id)),
+    mutationFn: (params: CheckOutParams) => lastValueFrom(service.checkOut(params.id, params.paymentMethod)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tickets'] }),
   }));
 }
