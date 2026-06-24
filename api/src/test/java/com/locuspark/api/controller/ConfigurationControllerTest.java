@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(ConfigurationController.class)
+@WebMvcTest({ConfigurationController.class, PricingConfigurationController.class})
 @AutoConfigureMockMvc(addFilters = false)
 @DisplayName("Testes de Controlador de Configuração - ConfigurationController")
 class ConfigurationControllerTest {
@@ -64,7 +64,7 @@ class ConfigurationControllerTest {
             when(configurationService.getTariffByCompany(companyId)).thenReturn(response);
 
             // Act & Assert
-            mockMvc.perform(get("/api/configurations/tariff")
+            mockMvc.perform(get("/configurations/tariff")
                             .requestAttr("companyId", companyId)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
@@ -95,7 +95,7 @@ class ConfigurationControllerTest {
             when(configurationService.getPricingByCompany(companyId)).thenReturn(response);
 
             // Act & Assert
-            mockMvc.perform(get("/api/configurations/pricing")
+            mockMvc.perform(get("/configurations/pricing")
                             .requestAttr("companyId", companyId)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())

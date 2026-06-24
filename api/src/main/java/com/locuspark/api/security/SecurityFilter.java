@@ -1,5 +1,6 @@
 package com.locuspark.api.security;
 
+import com.locuspark.api.entity.User;
 import com.locuspark.api.exception.TokenMissingException;
 import com.locuspark.api.repository.UserRepository;
 import jakarta.servlet.FilterChain;
@@ -54,6 +55,10 @@ public class SecurityFilter extends OncePerRequestFilter {
                 if (user != null) {
                     var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    if (user instanceof User appUser && appUser.getCompany() != null) {
+                        request.setAttribute("companyId", appUser.getCompany().getId());
+                    }
                 }
             }
 

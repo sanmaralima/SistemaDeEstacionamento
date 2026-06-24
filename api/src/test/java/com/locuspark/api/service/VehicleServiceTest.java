@@ -5,6 +5,7 @@ import com.locuspark.api.dto.response.VehicleResponse;
 import com.locuspark.api.entity.Client;
 import com.locuspark.api.entity.Company;
 import com.locuspark.api.entity.Vehicle;
+import com.locuspark.api.enums.VehicleType;
 import com.locuspark.api.exception.BusinessException;
 import com.locuspark.api.mapper.VehicleMapper;
 import com.locuspark.api.repository.ClientRepository;
@@ -74,8 +75,8 @@ class VehicleServiceTest {
                 .company(company)
                 .build();
 
-        requestRotativo = new VehicleRequest("AAA1234", "Civic", "Preto", null);
-        requestMensalista = new VehicleRequest("AAA1234", "Civic", "Preto", clientId);
+        requestRotativo = new VehicleRequest("AAA1234", "Civic", "Preto", VehicleType.CAR, null);
+        requestMensalista = new VehicleRequest("AAA1234", "Civic", "Preto", VehicleType.CAR, clientId);
 
         Plate plate = new Plate("AAA1234");
 
@@ -102,6 +103,7 @@ class VehicleServiceTest {
                 "AAA1234",
                 "Civic",
                 "Preto",
+                VehicleType.CAR,
                 null,
                 companyId
         );
@@ -111,6 +113,7 @@ class VehicleServiceTest {
                 "AAA1234",
                 "Civic",
                 "Preto",
+                VehicleType.CAR,
                 clientId,
                 companyId
         );

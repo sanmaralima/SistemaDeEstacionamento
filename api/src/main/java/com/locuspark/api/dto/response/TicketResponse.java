@@ -1,5 +1,6 @@
 package com.locuspark.api.dto.response;
 
+import com.locuspark.api.enums.PaymentMethod;
 import com.locuspark.api.enums.TicketStatus;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,5 +14,6 @@ public record TicketResponse(
         LocalDateTime enteredAt,
         LocalDateTime exitedAt,
         TicketStatus status,
-        BigDecimal totalAmount
+        BigDecimal totalAmount,
+        PaymentMethod paymentMethod
 ) {}

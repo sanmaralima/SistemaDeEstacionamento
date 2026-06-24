@@ -1,5 +1,6 @@
 package com.locuspark.api.entity;
 
+import com.locuspark.api.enums.PaymentMethod;
 import com.locuspark.api.enums.TicketStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -45,4 +46,8 @@ public class Ticket {
 
     @Column(name = "total_amount", precision = 10, scale = 2)
     private BigDecimal totalAmount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method")
+    private PaymentMethod paymentMethod;
 }

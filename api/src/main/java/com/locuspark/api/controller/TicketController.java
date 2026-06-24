@@ -1,6 +1,7 @@
 package com.locuspark.api.controller;
 
 import com.locuspark.api.dto.response.TicketResponse;
+import com.locuspark.api.enums.PaymentMethod;
 import com.locuspark.api.service.TicketService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,8 +31,9 @@ public class TicketController {
     @PostMapping("/{id}/check-out")
     public ResponseEntity<TicketResponse> checkOut(
             @PathVariable UUID id,
-            @RequestAttribute("companyId") UUID companyId) {
-        TicketResponse response = ticketService.checkOut(companyId, id);
+            @RequestAttribute("companyId") UUID companyId,
+            @RequestParam PaymentMethod paymentMethod) {
+        TicketResponse response = ticketService.checkOut(companyId, id, paymentMethod);
         return ResponseEntity.ok(response);
     }
 

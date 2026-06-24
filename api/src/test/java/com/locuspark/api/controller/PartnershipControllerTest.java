@@ -63,7 +63,7 @@ class PartnershipControllerTest {
             when(partnershipService.findAllByCompany(companyId)).thenReturn(List.of(response));
 
             // Act & Assert
-            mockMvc.perform(get("/api/partnerships")
+            mockMvc.perform(get("/partnerships")
                             .requestAttr("companyId", companyId)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())

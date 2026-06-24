@@ -2,6 +2,7 @@ package com.locuspark.api.service;
 
 import com.locuspark.api.dto.response.TicketResponse;
 import com.locuspark.api.entity.*;
+import com.locuspark.api.enums.PaymentMethod;
 import com.locuspark.api.enums.TicketStatus;
 import com.locuspark.api.exception.BusinessException;
 import com.locuspark.api.exception.ResourceNotFoundException; // Nova
@@ -60,7 +61,7 @@ public class TicketService {
     }
 
     @Transactional
-    public TicketResponse checkOut(UUID companyId, UUID ticketId) {
+    public TicketResponse checkOut(UUID companyId, UUID ticketId, PaymentMethod paymentMethod) {
         Ticket ticket = ticketRepository.findByIdAndCompanyId(ticketId, companyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket não encontrado nesta empresa."));
 
@@ -81,6 +82,7 @@ public class TicketService {
 
         ticket.setTotalAmount(total);
         ticket.setStatus(TicketStatus.PAID);
+        ticket.setPaymentMethod(paymentMethod);
 
         return ticketMapper.toResponse(ticketRepository.save(ticket));
     }
