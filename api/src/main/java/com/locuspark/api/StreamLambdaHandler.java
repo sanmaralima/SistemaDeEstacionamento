@@ -1,7 +1,7 @@
 package com.locuspark.api;
 
 import com.amazonaws.serverless.exceptions.ContainerInitializationException;
-import com.amazonaws.serverless.proxy.model.AwsProxyRequest;
+import com.amazonaws.serverless.proxy.model.HttpApiV2ProxyRequest; // ✅ Alterado para V2
 import com.amazonaws.serverless.proxy.model.AwsProxyResponse;
 import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler;
 import com.amazonaws.services.lambda.runtime.Context;
@@ -12,11 +12,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class StreamLambdaHandler implements RequestStreamHandler {
-    private static final SpringBootLambdaContainerHandler<AwsProxyRequest, AwsProxyResponse> handler;
+    // ✅ Atualizado o tipo genérico para HttpApiV2ProxyRequest
+    private static final SpringBootLambdaContainerHandler<HttpApiV2ProxyRequest, AwsProxyResponse> handler;
 
     static {
         try {
-            handler = SpringBootLambdaContainerHandler.getAwsProxyHandler(ApiApplication.class);
+            // ✅ Alterado de getAwsProxyHandler para getHttpApiV2ProxyHandler
+            handler = SpringBootLambdaContainerHandler.getHttpApiV2ProxyHandler(ApiApplication.class);
         } catch (ContainerInitializationException e) {
             throw new RuntimeException("Não foi possível inicializar o container do Spring Boot", e);
         }
