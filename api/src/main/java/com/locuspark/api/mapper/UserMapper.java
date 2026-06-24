@@ -15,11 +15,12 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true) // Criptografada no Service
     @Mapping(target = "role", ignore = true)     // Forçada como EMPLOYEE no Service
-    @Mapping(target = "company", ignore = true)  // Buscada no banco pelo Service
+    @Mapping(target = "company", ignore = true)
+    @Mapping(target = "authorities", ignore = true)// Buscada no banco pelo Service
     User toEntity(RegisterRequest request);
 
     @Mapping(target = "companyId", source = "company.id")
-    @Mapping(target = "authorities", ignore = true)
+    @Mapping(target = "name", source = "username")
     UserResponse toResponse(User user);
 
     @Mapping(target = "id", ignore = true)
