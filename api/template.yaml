@@ -2,6 +2,20 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: AWS SAM template para implantação do backend do LocusPark com SnapStart
 
+Parameters:
+  DbUrlParam:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /locuspark/prod/DB_URL
+  DbUserParam:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /locuspark/prod/DB_USER
+  DbPassParam:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /locuspark/prod/DB_PASS
+  ApiSecretParam:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /locuspark/prod/API_SECURITY_TOKEN_SECRET
+
 Globals:
   Function:
     Runtime: java21
@@ -13,10 +27,10 @@ Globals:
     Environment:
       Variables:
         SPRING_PROFILES_ACTIVE: prod
-        DB_URL: '{{resolve:ssm-secure:/locuspark/prod/DB_URL}}'
-        DB_USER: '{{resolve:ssm-secure:/locuspark/prod/DB_USER}}'
-        DB_PASS: '{{resolve:ssm-secure:/locuspark/prod/DB_PASS}}'
-        API_SECURITY_TOKEN_SECRET: '{{resolve:ssm-secure:/locuspark/prod/API_SECURITY_TOKEN_SECRET}}'
+        DB_URL: !Ref DbUrlParam
+        DB_USER: !Ref DbUserParam
+        DB_PASS: !Ref DbPassParam
+        API_SECURITY_TOKEN_SECRET: !Ref ApiSecretParam
 
 Resources:
   LocusParkAPI:
