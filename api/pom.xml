@@ -156,6 +156,14 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<!-- ✅ Adicionado o bloco dependencies interno exigido pelo serverless-java-container -->
+				<dependencies>
+					<dependency>
+						<groupId>com.amazonaws.serverless</groupId>
+						<artifactId>aws-serverless-java-container-springboot3</artifactId>
+						<version>2.0.3</version>
+					</dependency>
+				</dependencies>
 				<configuration>
 					<excludes>
 						<exclude>
