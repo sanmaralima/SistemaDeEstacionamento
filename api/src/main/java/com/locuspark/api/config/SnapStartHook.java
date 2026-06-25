@@ -27,7 +27,9 @@ public class SnapStartHook implements Resource {
 
     @Override
     public void afterRestore(Context<? extends Resource> context) throws Exception {
-        // Abre e fecha uma conexão só pra validar
-        try (var conn = dataSource.getConnection()) { }
+        dataSource.getHikariPoolMXBean().softEvictConnections(); // ✅ evicta conexões mortas
+        try (var conn = dataSource.getConnection()) {
+            conn.isValid(5); // ✅ valida com timeout de 5s
+        }
     }
 }
