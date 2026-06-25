@@ -10,19 +10,20 @@ import { SettingsPrice } from './pages/settings-price/settings-price.component';
 import { Profile } from './pages/profile/profile.component';
 import { Login } from './pages/auth/login/login';
 import { Cadastro } from './pages/auth/cadastro/cadastro';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'cadastro', component: Cadastro },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: 'dashboard', component: Dashboard },
-  { path: 'entry', component: Entry },
-  { path: 'exit', component: Exit },
-  { path: 'parking-spots', component: ParkingSpots },
-  { path: 'history', component: History },
-  { path: 'reports', component: Reports },
-  { path: 'manage-team', component: ManageTeam },
-  { path: 'settings-price', component: SettingsPrice },
-  { path: 'profile', component: Profile },
+  { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
+  { path: 'entry', component: Entry, canActivate: [authGuard] },
+  { path: 'exit', component: Exit, canActivate: [authGuard] },
+  { path: 'parking-spots', component: ParkingSpots, canActivate: [authGuard] },
+  { path: 'history', component: History, canActivate: [authGuard] },
+  { path: 'reports', component: Reports, canActivate: [authGuard] },
+  { path: 'manage-team', component: ManageTeam, canActivate: [authGuard] },
+  { path: 'settings-price', component: SettingsPrice, canActivate: [authGuard] },
+  { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: '**', redirectTo: 'login' }
 ];

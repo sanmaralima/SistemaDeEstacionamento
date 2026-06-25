@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { useRegisterMutation } from '../../../core/domains/auth/auth.hooks';
 
 @Component({
   selector: 'app-cadastro',
@@ -24,9 +25,11 @@ export class Cadastro {
     confirmarSenha: '',
   };
 
-  constructor(private router: Router) {}
+  private readonly router = inject(Router);
+  private readonly registerMutation = useRegisterMutation();
 
   concluir(): void {
+    console.log('Cadastro.concluir chamado com form:', this.form);
     this.erro = '';
 
     const { nomeEmpresa, cnpj, totalVagas, nomeUsuario, senha, confirmarSenha } = this.form;
@@ -46,8 +49,21 @@ export class Cadastro {
       return;
     }
 
-    // Aqui futuramente chama o serviço de cadastro
-    // Por ora redireciona para o login
-    this.router.navigate(['/login']);
+    this.registerMutation.mutate(
+      {
+        username: nomeUsuario,
+        password: senha,
+        companyName: nomeEmpresa,
+        name: nomeUsuario,
+      },
+      {
+        onSuccess: () => {
+          this.router.navigate(['/login']);
+        },
+        onError: () => {
+          this.erro = 'Erro ao realizar o cadastro. Verifique as informações ou se o usuário já existe.';
+        },
+      }
+    );
   }
 }

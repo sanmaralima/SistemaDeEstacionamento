@@ -9,24 +9,26 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}auth`;
 
-  readonly token = signal<string | null>(null);
-  readonly companyId = signal<string | null>(null);
+  readonly token = signal<string | null>(localStorage.getItem('token'));
+  readonly companyId = signal<string | null>(localStorage.getItem('companyId'));
 
   login(request: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.baseUrl}/login`, request).pipe(
       tap((response) => {
         this.token.set(response.token);
-        this.companyId.set(response.companyId);
+        localStorage.setItem('token', response.token);
       })
     );
   }
 
-  register(request: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/register`, request);
+  register(request: RegisterRequest): Observable<unknown> {
+    return this.http.post(`${this.baseUrl}/register`, request, { responseType: 'text' });
   }
 
   logout(): void {
     this.token.set(null);
     this.companyId.set(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('companyId');
   }
 }

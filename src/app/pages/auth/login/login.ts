@@ -1,7 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { useLoginMutation } from '../../../core/domains/auth/auth.hooks';
+import { UserService } from '../../../core/domains/user/user.service';
+import { AuthService } from '../../../core/domains/auth/auth.service';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -16,9 +20,13 @@ export class Login {
   senhaVisivel = false;
   erroLogin = '';
 
-  constructor(private router: Router) {}
+  private readonly router = inject(Router);
+  private readonly loginMutation = useLoginMutation();
+  private readonly userService = inject(UserService);
+  private readonly authService = inject(AuthService);
 
   entrar(): void {
+    console.log('Login.entrar chamado com usuário:', this.usuario);
     this.erroLogin = '';
 
     if (!this.usuario.trim() || !this.senha.trim()) {
@@ -26,11 +34,26 @@ export class Login {
       return;
     }
 
-    // Credenciais fixas por enquanto (substituir por serviço de auth)
-    if (this.usuario === 'admin' && this.senha === '123456') {
-      this.router.navigate(['/']);
-    } else {
-      this.erroLogin = 'Usuário ou senha incorretos.';
-    }
+    this.loginMutation.mutate(
+      {
+        username: this.usuario,
+        password: this.senha,
+      },
+      {
+        onSuccess: async () => {
+          try {
+            const profile = await lastValueFrom(this.userService.getProfile());
+            this.authService.companyId.set(profile.companyId);
+            localStorage.setItem('companyId', profile.companyId);
+            this.router.navigate(['/dashboard']);
+          } catch (err: unknown) {
+            this.erroLogin = 'Erro ao carregar os dados de perfil do usuário.';
+          }
+        },
+        onError: () => {
+          this.erroLogin = 'Usuário ou senha incorretos.';
+        },
+      }
+    );
   }
 }
