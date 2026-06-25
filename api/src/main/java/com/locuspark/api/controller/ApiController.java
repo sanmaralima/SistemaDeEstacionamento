@@ -10,6 +10,6 @@ public class ApiController {
         
     @GetMapping("/hello")
     public String hello() {
-        return "Hello, World!";
+        return "Olá, bem vindo ao sistema Locus Park";
     }   
 }
