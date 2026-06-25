@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { useTicketsQuery } from '../../core/domains/ticket/ticket.hooks';
@@ -21,7 +21,7 @@ interface GridSpot {
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
-export class Dashboard implements OnInit {
+export class Dashboard {
   private readonly router = inject(Router);
   private readonly spotAssignmentService = inject(SpotAssignmentService);
 
@@ -84,11 +84,7 @@ export class Dashboard implements OnInit {
     return this.spotAssignmentService.getSpot(ticket);
   }
 
-  ngOnInit(): void {
-    // Forçar recarga das queries ao entrar
-    this.ticketsQuery.refetch();
-    this.reportQuery.refetch();
-  }
+
 
   protected formatarDataAtual(): string {
     const data = new Date();
@@ -116,6 +112,8 @@ export class Dashboard implements OnInit {
 
   protected handleCheckoutConfirmed(): void {
     this.ticketsQuery.refetch();
-    this.reportQuery.refetch();
+    if (this.companyId() && this.companyId() !== 'null' && this.companyId() !== 'undefined') {
+      this.reportQuery.refetch();
+    }
   }
 }

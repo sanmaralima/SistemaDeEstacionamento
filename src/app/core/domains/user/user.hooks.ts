@@ -17,7 +17,7 @@ export function useUsersByCompanyQuery(companyId: Signal<string>) {
   return injectQuery(() => ({
     queryKey: ['users', 'company', companyId()] as const,
     queryFn: () => lastValueFrom(service.getByCompany(companyId())),
-    enabled: !!companyId(),
+    enabled: !!companyId() && companyId() !== 'null' && companyId() !== 'undefined',
   }));
 }
 

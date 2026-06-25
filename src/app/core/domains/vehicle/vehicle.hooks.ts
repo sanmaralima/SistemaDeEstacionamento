@@ -9,7 +9,7 @@ export function useVehiclesQuery(companyId: Signal<string>) {
   return injectQuery(() => ({
     queryKey: ['vehicles', companyId()] as const,
     queryFn: () => lastValueFrom(service.listAll(companyId())),
-    enabled: !!companyId(),
+    enabled: !!companyId() && companyId() !== 'null' && companyId() !== 'undefined',
   }));
 }
 
@@ -18,7 +18,7 @@ export function useVehicleByIdQuery(companyId: Signal<string>, id: Signal<string
   return injectQuery(() => ({
     queryKey: ['vehicles', companyId(), id()] as const,
     queryFn: () => lastValueFrom(service.getById(companyId(), id())),
-    enabled: !!companyId() && !!id(),
+    enabled: !!companyId() && companyId() !== 'null' && companyId() !== 'undefined' && !!id(),
   }));
 }
 

@@ -8,6 +8,6 @@ export function useReportQuery(companyId: Signal<string | null>) {
   return injectQuery(() => ({
     queryKey: ['reports', companyId()] as const,
     queryFn: () => lastValueFrom(service.getMetrics(companyId()!)),
-    enabled: !!companyId(),
+    enabled: !!companyId() && companyId() !== 'null' && companyId() !== 'undefined',
   }));
 }

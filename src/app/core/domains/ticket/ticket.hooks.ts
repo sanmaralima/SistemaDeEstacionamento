@@ -3,12 +3,15 @@ import { injectQuery, injectMutation, QueryClient } from '@tanstack/angular-quer
 import { lastValueFrom } from 'rxjs';
 import { TicketService } from './ticket.service';
 import { ApplyPartnershipParams, CheckOutParams } from './ticket.types';
+import { AuthService } from '../auth/auth.service';
 
 export function useTicketsQuery() {
   const service = inject(TicketService);
+  const authService = inject(AuthService);
   return injectQuery(() => ({
     queryKey: ['tickets', 'active'] as const,
     queryFn: () => lastValueFrom(service.getAll()),
+    enabled: !!authService.token() && !!authService.companyId() && authService.companyId() !== 'null' && authService.companyId() !== 'undefined',
   }));
 }
 
