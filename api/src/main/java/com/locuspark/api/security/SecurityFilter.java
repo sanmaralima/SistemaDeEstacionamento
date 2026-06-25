@@ -42,6 +42,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             String path = request.getRequestURI();
 
             boolean isPublic = path.equals("/auth/login") || path.equals("/auth/register") ||
+                    path.equals("/api/hello") ||
                     path.startsWith("/v3/api-docs") || path.startsWith("/swagger-ui");
 
             if (token == null && !isPublic) {
