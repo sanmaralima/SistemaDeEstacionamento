@@ -37,11 +37,11 @@ A aplicação utiliza uma arquitetura totalmente desacoplada, dividida em duas b
 * *Segurança Programática Cruzada*: Validação no backend que impede que usuários EMPLOYEE alterem perfis, ou que um ADMIN manipule dados ou mude papéis de usuários pertencentes a outros pátios.
 * *TDD Avançado*: Suíte de testes unitários e de integração integrando MockMvc e Mockito com banco de dados H2 em memória, garantindo rollback automático a cada execução de teste.
 
-## 📂 Estrutura das Branches
+## 📂 Estrutura das Pastas
 
-O projeto está dividido de forma isolada através de branches do Git:
+O projeto está dividido de forma isolada através das pastas:
 
-### Branch: backend
+### Pasta: backend
 
 ```text
 api/src/main/java/com/locuspark/api/
@@ -58,7 +58,7 @@ api/src/main/java/com/locuspark/api/
 └── types/                   # Value Objects de domínio (Cpf, Cnpj, Plate)
 ```
 
-### Branch: frontend
+### Pasta: frontend
 
 ```text
 src/app/
@@ -85,9 +85,9 @@ src/app/
 
 ### 🟢 Rodando o Backend (API)
 
-1. *Abra o terminal e mude para a branch backend:*
+1. *Abra o terminal e mude para a pasta backend:*
     ```bash
-    git checkout backend
+    cd backend
     ```
 2. *Navegue até a pasta da API:*
      ```bash
@@ -109,9 +109,9 @@ src/app/
 
 ### 🔵 Rodando o Frontend (Painel Angular)
 
-1. *Abra outro terminal e mude para a branch frontend:*
+1. *Abra outro terminal e mude para a pasta frontend:*
     ```bash
-    git checkout frontend
+    cd frontend
     ```
 2. *Instale todas as dependências do projeto:*
     ```bash
