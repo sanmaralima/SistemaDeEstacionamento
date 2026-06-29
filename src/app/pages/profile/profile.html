@@ -1,0 +1,115 @@
+<div class="profile-page">
+  <div class="profile-header">
+    <h1>Meu Perfil</h1>
+  </div>
+
+  <div class="profile-grid">
+    <!-- Coluna da Esquerda -->
+    <div class="profile-left-col">
+      <!-- Card do Usuário -->
+      <div class="profile-card user-card">
+        @if (profileQuery.isLoading()) {
+          <div class="loading-placeholder">Carregando dados...</div>
+        } @else if (profileQuery.isError()) {
+          <div class="error-placeholder">Erro ao carregar dados do perfil.</div>
+        } @else {
+          @let user = profileQuery.data();
+          <div class="avatar-container">
+            <svg class="avatar-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+            </svg>
+          </div>
+          <h2 class="username">@{{ user?.name }}</h2>
+          <span class="role-badge" [class.admin]="user?.role === 'ADMIN'">
+            {{ formatRole(user?.role || '') }}
+          </span>
+        }
+      </div>
+
+      <!-- Card Estacionamento Ativo -->
+      <div class="profile-card active-parking-card">
+        <div class="card-header">
+          <svg class="card-header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
+          </svg>
+          <h3>Estacionamento Ativo</h3>
+        </div>
+        <div class="card-divider"></div>
+        <div class="parking-info">
+          <div class="info-group">
+            <span class="info-label">NOME</span>
+            <span class="info-value">LocusPark Bragança Central</span>
+          </div>
+          <div class="info-group">
+            <span class="info-label">CNPJ</span>
+            <span class="info-value">12.345.678/0001-99</span>
+          </div>
+          <div class="info-group">
+            <span class="info-label">VAGAS TOTAIS</span>
+            <span class="info-value text-bold">120 vagas</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coluna da Direita (Segurança) -->
+    <div class="profile-right-col">
+      <div class="profile-card security-card">
+        <div class="card-header flex-column">
+          <div class="header-title-row">
+            <svg class="card-header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+            </svg>
+            <h3>Segurança da Conta</h3>
+          </div>
+          <p class="card-subtitle">Atualize seus dados de autenticação de pátio</p>
+        </div>
+        <div class="card-divider"></div>
+
+        <form class="security-form" (submit)="$event.preventDefault(); changePassword()">
+          <div class="form-field full-width">
+            <label for="currentPassword">Senha Atual</label>
+            <input
+              id="currentPassword"
+              type="password"
+              [value]="currentPassword()"
+              (input)="currentPassword.set($any($event.target).value)"
+              placeholder="Sua senha operacional atual"
+              required
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label for="newPassword">Nova Senha</label>
+              <input
+                id="newPassword"
+                type="password"
+                [value]="newPassword()"
+                (input)="newPassword.set($any($event.target).value)"
+                placeholder="Mínimo 8 dígitos"
+                required
+              />
+            </div>
+
+            <div class="form-field">
+              <label for="confirmPassword">Confirmar Nova Senha</label>
+              <input
+                id="confirmPassword"
+                type="password"
+                [value]="confirmPassword()"
+                (input)="confirmPassword.set($any($event.target).value)"
+                placeholder="Repita a nova senha"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-action" [appLoading]="updateUserMutation.isPending()" loadingText="Salvando...">Alterar Senha</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

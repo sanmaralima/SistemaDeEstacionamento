@@ -1,0 +1,141 @@
+<div class="entry-page">
+  <!-- Coluna principal: formulário -->
+  <div class="entry-form-col">
+    <div class="page-header">
+      <h1>Entrada de Veículos</h1>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-header">
+        <h2>Dados do Veículo</h2>
+        <p>Preencha as informações para registrar a entrada no pátio</p>
+      </div>
+
+      <div class="form-card-body">
+        <form (submit)="$event.preventDefault(); confirmEntry()">
+          <div class="form-row">
+            <div class="form-field">
+              <label for="plate">Placa do Veículo <span class="required">*</span></label>
+              <input
+                id="plate"
+                type="text"
+                [value]="plate()"
+                (input)="plate.set($any($event.target).value)"
+                placeholder="ABC-1234"
+                maxlength="8"
+                required
+              />
+            </div>
+
+            <div class="form-field">
+              <label for="vehicleType">Tipo de Veículo</label>
+              <select
+                id="vehicleType"
+                [value]="vehicleType()"
+                (change)="vehicleType.set($any($event.target).value)"
+              >
+                <option value="Carro">Carro</option>
+                <option value="Moto">Moto</option>
+                <option value="Van">Van</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="modelName">Modelo / Marca <span class="required">*</span></label>
+            <input
+              id="modelName"
+              type="text"
+              [value]="modelName()"
+              (input)="modelName.set($any($event.target).value)"
+              placeholder="Ex: Honda Civic, Toyota Corolla..."
+              required
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="selectedSpot">Número da Vaga <span class="required">*</span></label>
+            <select
+              id="selectedSpot"
+              [value]="selectedSpot()"
+              (change)="selectedSpot.set(+$any($event.target).value)"
+              class="select-vaga"
+              required
+            >
+              <option [value]="0">Selecione uma vaga disponível</option>
+              @for (vaga of availableSpots(); track vaga.numero) {
+                <option [value]="vaga.numero">{{ vaga.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="toggle-field">
+            <div class="toggle-info">
+              <span class="toggle-label">Cliente Mensalista?</span>
+              <span class="toggle-sub">Aplicar tarifa especial de mensalidade</span>
+            </div>
+            <button
+              class="toggle-btn"
+              [class.on]="isMonthly()"
+              (click)="isMonthly.set(!isMonthly())"
+              type="button"
+            >
+              <span class="toggle-thumb"></span>
+            </button>
+          </div>
+
+          <button type="submit" class="btn-confirmar" [appLoading]="isConfirming()" loadingText="Confirmando...">
+            Confirmar Entrada
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Coluna lateral: info cards -->
+  <aside class="entry-info-col">
+    <!-- Card de Vagas Disponíveis -->
+    <div class="info-card">
+      <div class="info-card-icon green">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="2.5">
+          <rect x="3" y="3" width="18" height="18" rx="3"/>
+          <path d="M9 17V7h4a3 3 0 010 6H9"/>
+        </svg>
+      </div>
+      <p class="info-card-label">Vagas Disponíveis</p>
+      <h2 class="info-card-value">{{ freeSpotsCount() }}</h2>
+      <p class="info-card-sub">de {{ totalSpots }} vagas totais</p>
+      <div class="progress-bar">
+        <div
+          class="progress-fill"
+          [style.width.%]="(freeSpotsCount() / totalSpots) * 100"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Card de Relógio -->
+    <div class="info-card">
+      <div class="info-card-icon blue">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#3b82f6" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/>
+        </svg>
+      </div>
+      <p class="info-card-label">Hora Atual</p>
+      <h2 class="info-card-value mono">{{ timeString() }}</h2>
+      <p class="info-card-sub">{{ dateString() }}</p>
+    </div>
+
+    <!-- Card de Veículos no Pátio -->
+    <div class="info-card">
+      <div class="info-card-icon gray">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#64748b" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h7.5m3 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h2.086c.83 0 1.545-.5 1.828-1.28l1.396-3.84a1.5 1.5 0 0 0-1.413-2.013H2.27A1.5 1.5 0 0 0 .857 13.626l1.396 3.84a1.5 1.5 0 0 0 1.828 1.28H8.25Z" />
+        </svg>
+      </div>
+      <p class="info-card-label">No Estacionamento</p>
+      <h2 class="info-card-value">{{ occupiedSpotsCount() }}</h2>
+      <p class="info-card-sub">veículos ativos agora</p>
+    </div>
+  </aside>
+</div>

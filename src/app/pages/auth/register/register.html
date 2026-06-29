@@ -1,0 +1,125 @@
+<div class="auth-bg">
+  <div class="auth-card cadastro-card">
+
+    <div class="card-back">
+      <a routerLink="/login">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Voltar
+      </a>
+    </div>
+
+    <div class="auth-logo">
+      <img src="locus-image.jpg" alt="Locus Park" class="logo-img" />
+    </div>
+
+    <div class="auth-header">
+      <h1>Cadastrar Estacionamento (SaaS)</h1>
+      <p>Crie a empresa locatária e o usuário administrador master</p>
+    </div>
+
+    <div class="auth-body">
+
+      <!-- Seção 1 -->
+      <div class="section-label">
+        <span class="section-number">1</span>
+        DADOS DO ESTABELECIMENTO
+      </div>
+
+      <div class="form-field">
+        <label>Nome da Empresa / Razão Social</label>
+        <input
+          type="text"
+          [(ngModel)]="form.companyName"
+          placeholder="Ex: Estacionamento Silva"
+        />
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label>CNPJ</label>
+          <input
+            type="text"
+            [(ngModel)]="form.cnpj"
+            (input)="onCnpjInput($event)"
+            placeholder="00.000.000/0001-00"
+            maxlength="18"
+          />
+        </div>
+
+        <div class="form-field">
+          <label>Total de Vagas</label>
+          <input
+            type="number"
+            [(ngModel)]="form.totalSpots"
+            placeholder="Ex: 50"
+            min="1"
+          />
+        </div>
+      </div>
+
+      <!-- Seção 2 -->
+      <div class="section-label" style="margin-top: 8px;">
+        <span class="section-number">2</span>
+        ADMINISTRADOR PRINCIPAL
+      </div>
+
+      <div class="form-field">
+        <label>Nome de Usuário</label>
+        <input
+          type="text"
+          [(ngModel)]="form.username"
+          placeholder="usuario.admin"
+        />
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label>Senha</label>
+          <div class="input-icon">
+            <input
+              [type]="isPasswordVisible ? 'text' : 'password'"
+              [(ngModel)]="form.password"
+              placeholder="••••••••"
+            />
+            <button class="btn-toggle-senha" (click)="isPasswordVisible = !isPasswordVisible" type="button">
+              <svg *ngIf="!isPasswordVisible" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+              <svg *ngIf="isPasswordVisible" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Confirmar Senha</label>
+          <div class="input-icon">
+            <input
+              [type]="isConfirmPasswordVisible ? 'text' : 'password'"
+              [(ngModel)]="form.confirmPassword"
+              placeholder="••••••••"
+            />
+            <button class="btn-toggle-senha" (click)="isConfirmPasswordVisible = !isConfirmPasswordVisible" type="button">
+              <svg *ngIf="!isConfirmPasswordVisible" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+              <svg *ngIf="isConfirmPasswordVisible" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-msg">{{ errorMessage }}</div>
+
+      <button class="btn-entrar" [appLoading]="registerMutation.isPending()" loadingText="Cadastrando..." (click)="onSubmit()">Concluir Cadastro</button>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,7 @@
+<div class="app-shell" [class.auth-mode]="isAuthRoute()">
+  <app-sidebar *ngIf="!isAuthRoute()" />
+  <main class="app-main" [class.full-width]="isAuthRoute()">
+    <router-outlet />
+  </main>
+</div>
+<app-toast />
