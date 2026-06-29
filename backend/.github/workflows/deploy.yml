@@ -1,0 +1,81 @@
+name: LocusPark Backend Pipeline (AWS Lambda Deploy)
+
+on:
+  push:
+    branches: [ backend ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+
+      - name: Cache Maven Local Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+
+      - name: Make Maven Wrapper Executable
+        run: chmod +x mvnw
+
+      - name: Build Project and Run All Verified Tests
+        run: ./mvnw clean package
+
+      - name: Run Database Migrations (TiDB Cloud)
+        run: ./mvnw flyway:migrate
+        env:
+          TIDB_HOST: ${{ secrets.TIDB_HOST }}
+          TIDB_USER: ${{ secrets.TIDB_USER }}
+          TIDB_PASS: ${{ secrets.TIDB_PASS }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      # ✅ STEP ADICIONADO: busca e mascara os segredos do SSM
+      - name: Fetch and Mask SSM Parameters
+        run: |
+          DB_URL=$(aws ssm get-parameter --name /locuspark/prod/DB_URL --with-decryption --query Parameter.Value --output text)
+          DB_USER=$(aws ssm get-parameter --name /locuspark/prod/DB_USER --with-decryption --query Parameter.Value --output text)
+          DB_PASS=$(aws ssm get-parameter --name /locuspark/prod/DB_PASS --with-decryption --query Parameter.Value --output text)
+          API_SECRET=$(aws ssm get-parameter --name /locuspark/prod/API_SECURITY_TOKEN_SECRET --with-decryption --query Parameter.Value --output text)
+
+          echo "::add-mask::$DB_URL"
+          echo "::add-mask::$DB_USER"
+          echo "::add-mask::$DB_PASS"
+          echo "::add-mask::$API_SECRET"
+
+          echo "DB_URL=$DB_URL" >> $GITHUB_ENV
+          echo "DB_USER=$DB_USER" >> $GITHUB_ENV
+          echo "DB_PASS=$DB_PASS" >> $GITHUB_ENV
+          echo "API_SECRET=$API_SECRET" >> $GITHUB_ENV
+
+      # ✅ --parameter-overrides ADICIONADO e --template-file corrigido
+      - name: Deploy Framework to AWS Serverless Application Model
+        run: |
+          sam deploy \
+            --template-file template.yaml \
+            --stack-name locuspark-backend-prod \
+            --s3-bucket ${{ secrets.AWS_S3_BUCKET }} \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset \
+            --capabilities CAPABILITY_IAM \
+            --parameter-overrides \
+              DbUrlParam="$DB_URL" \
+              DbUserParam="$DB_USER" \
+              DbPassParam="$DB_PASS" \
+              ApiSecretParam="$API_SECRET"
