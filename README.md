@@ -30,6 +30,16 @@ A aplicação utiliza uma arquitetura totalmente desacoplada, dividida em duas b
     * *Regras Extras*: Configuração de tolerâncias por lei, taxas fixas de pernoite e multa por perda de ticket físico.
     * *Gatilhos de Diária*: Conversão automática do valor acumulado por horas em diária cheia para beneficiar o cliente.
     * *Convênios e Selos*: Parcerias com o comércio local aplicando descontos fixos, porcentagens ou abono de horas.
+ 
+---
+## ✅ Cobertura de Testes
+
+O projeto possui testes automatizados tanto no backend quanto no frontend:
+
+* **Backend (Java/Spring Boot):** Suíte completa de testes unitários e de integração utilizando **JUnit 5** com **Mockito** para mock de dependências e **MockMvc** para simulação de requisições HTTP. Os testes rodam com banco H2 em memória com rollback automático.
+* **Frontend (Angular):** Testes unitários de componentes e serviços escritos com **Vitest**, garantindo a integridade da lógica reativa baseada em Signals.
+
+---
 
 ## 🧠 Conceitos Arquiteturais e Boas Práticas Aplicados
 
@@ -52,7 +62,7 @@ api/src/main/java/com/locuspark/api/
 ├── enums/                   # Controle de papéis (UserRole) e status
 ├── exception/               # Handler global de exceções da API
 ├── infrastructure/          # Conversores JPA customizados para os VOs
-├── mapper/                  # Interfaces MapStruct deAlice conversão rápida
+├── mapper/                  # Interfaces MapStruct de conversão rápida
 ├── repository/              # Camada de persistência Spring Data
 ├── security/                # Filtros de interceptação de tokens JWT
 └── types/                   # Value Objects de domínio (Cpf, Cnpj, Plate)
@@ -131,12 +141,13 @@ src/app/
 *1. Registro de Entrada de Veículo (Rotativo):*
 * *Endpoint*: POST /tickets/check-in
 * *Payload enviado pelo Frontend:*
-json
+```json
 {
   "plate": "ABC1D23",
   "model": "Honda Civic",
   "color": "Preto"
 }
+```
 
 * *Resposta segura da API (201 Created):*
 
@@ -148,3 +159,4 @@ json
   "status": "ACTIVE",
   "companyId": "7359c468-4a16-46ad-b914-2c68d7a120db"
 }
+```
